@@ -13,8 +13,9 @@ from .serializers import (
 
 def netInterface(request):
 	context = {
-		"detail": "creepyscrap.onrender.com only scrap default fiberHome <accessPoint:passKey>"
-		}		
+		"detail": "creepyScrap only scrap default fiberHome <accessPoint:passKey>"
+		}
+
 	return render(request, "interface.html", context)
 
 @api_view(["POST"])
