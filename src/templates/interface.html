@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>creepyScrap.com</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&family=Unbounded:wght@400;600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #13141a;
+            --bg-surface: #12141c;
+            --bg-terminal: #07080b;
+            --color-red: #ff3333;
+            --color-red-glow: rgba(255, 51, 51, 0.4);
+            --color-amber: #ffaa00;
+            --color-amber-glow: rgba(255, 170, 0, 0.4);
+            --color-green: #00ff66;
+            --color-green-glow: rgba(0, 255, 102, 0.4);
+            --text-primary: #f0f2f5;
+            --text-secondary: #8e95a5;
+            --border-muted: #2d313f;
+            --border-active: #ff3333;
+            --font-mono: 'JetBrains Mono', 'Share Tech Mono', monospace;
+            --font-display: 'Unbounded', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 6px 100%;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: radial-gradient(circle, transparent 60%, rgba(0, 0, 0, 0.8) 100%);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 51, 51, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 51, 51, 0.03) 1px, transparent 1px);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .hazard-stripes {
+            height: 8px;
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--color-red),
+                var(--color-red) 10px,
+                #000 10px,
+                #000 20px
+            );
+            border-bottom: 2px solid #000;
+        }
+
+        .hazard-stripes.amber {
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--color-amber),
+                var(--color-amber) 10px,
+                #000 10px,
+                #000 20px
+            );
+        }
+
+        .console-container {
+            width: 100%;
+            height: 56vh;
+            max-height: 560px;
+            min-height: 280px;
+            background-color: var(--bg-surface);
+            border: 1px solid rgba(255, 51, 51, 0.15);
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.95);
+            z-index: 20;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border-radius: 4px;
+            transition: opacity 0.3s ease;
+        }
+
+        .console-container.screen-off {
+            opacity: 0 !important;
+            pointer-events: none;
+            transition: opacity 0.15s ease-out;
+        }
+
+        .monitor-housing {
+            background-color: #dfd7ca;
+            padding: 16px 16px 10px 16px;
+            border-radius: 16px;
+            box-shadow: 
+                0 25px 50px -15px rgba(0, 0, 0, 0.75),
+                inset 3px 3px 0px #ffffff,
+                inset -3px -3px 0px #857e72,
+                0px 8px 0px #857e72;
+            border: 1px solid #b3a99a;
+            max-width: 720px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 10px auto;
+            position: relative;
+            z-index: 20;
+        }
+
+        .monitor-housing::before {
+            content: "";
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 4px;
+            background: repeating-linear-gradient(90deg, #7b7569, #7b7569 5px, transparent 5px, transparent 10px);
+            border-radius: 2px;
+            opacity: 0.7;
+        }
+
+        .monitor-screen-bezel {
+            background-color: #07080b;
+            padding: 12px;
+            border-radius: 6px;
+            border-top: 4px solid #222222;
+            border-left: 4px solid #222222;
+            border-bottom: 4px solid #e2dbcd;
+            border-right: 4px solid #e2dbcd;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.95);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .crt-glare {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 15%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+            z-index: 101;
+            pointer-events: none;
+            border-radius: 3px;
+        }
+
+        .monitor-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px 6px 15px;
+            border-top: 2px solid #857f75;
+            background-color: #d2cabf;
+            border-radius: 4px;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.15);
+        }
+
+        .monitor-power {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .power-led {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #00ff66;
+            box-shadow: 0 0 8px #00ff66;
+            transition: all 0.3s ease;
+        }
+
+        .power-led.off {
+            background-color: #2a2a2a;
+            box-shadow: none;
+        }
+
+        .monitor-stand {
+            width: 100px;
+            height: 8px;
+            background-color: #c4bbb0;
+            margin: 0 auto;
+            border-radius: 2px;
+            box-shadow: 
+                inset 1px 1px 0px #ffffff,
+                inset -1px -1px 0px #555555,
+                0px 3px 5px rgba(0,0,0,0.3);
+            border-top: 1px solid #dfd7ca;
+            position: relative;
+            z-index: 10;
+        }
+
+        .computer-case {
+            width: 740px;
+            max-width: 100%;
+            height: 60px;
+            background-color: #dfd7ca;
+            margin: 0 auto;
+            border-radius: 6px;
+            border: 1px solid #b3a99a;
+            box-shadow: 
+                inset 3px 3px 0px #ffffff,
+                inset -3px -3px 0px #857e72,
+                0px 12px 24px rgba(0,0,0,0.6);
+            position: relative;
+            z-index: 10;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .case-front {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #d7cdbe;
+            border-radius: 4px;
+            border-top: 2px solid #857e72;
+            border-left: 2px solid #857e72;
+            border-bottom: 2px solid #ffffff;
+            border-right: 2px solid #ffffff;
+            padding: 0 10px;
+            gap: 10px;
+        }
+
+        .floppy-drive {
+            display: flex;
+            align-items: center;
+            background-color: #555249;
+            padding: 4px 6px;
+            border-radius: 3px;
+            border-top: 1.5px solid #111;
+            border-left: 1.5px solid #111;
+            border-bottom: 1.5px solid #fff;
+            border-right: 1.5px solid #fff;
+            position: relative;
+            width: 130px;
+            height: 26px;
+            gap: 6px;
+        }
+
+        .floppy-slot {
+            flex-grow: 1;
+            height: 2.5px;
+            background-color: #000;
+            border-radius: 1px;
+            position: relative;
+        }
+
+        .floppy-slot::after {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 2.5px;
+            background-color: #111;
+            border-radius: 0 0 1.5px 1.5px;
+        }
+
+        .floppy-button {
+            width: 12px;
+            height: 7px;
+            background-color: #a39b8e;
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            border-bottom: 1px solid #333;
+            border-right: 1px solid #333;
+            cursor: pointer;
+        }
+
+        .floppy-led {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: #4a3e3d;
+            box-shadow: none;
+            transition: all 0.1s ease;
+        }
+
+        .floppy-led.active {
+            background-color: #00ff66;
+            box-shadow: 0 0 6px #00ff66;
+        }
+
+        .case-vents {
+            display: flex;
+            gap: 3px;
+        }
+
+        .case-vents span {
+            width: 3px;
+            height: 20px;
+            background-color: #7b7569;
+            border-radius: 1px;
+            box-shadow: inset 1px 1px 0px rgba(0,0,0,0.3);
+        }
+
+        .toggle-switch-wrap {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-switch-label {
+            font-size: 8px;
+            font-weight: 800;
+            color: #706a5e;
+            letter-spacing: 0.5px;
+            user-select: none;
+            line-height: 1;
+        }
+
+        .power-rocker-container {
+            width: 20px;
+            height: 34px;
+            background-color: #222;
+            border-radius: 4px;
+            border-top: 1.5px solid #4a453d;
+            border-left: 1.5px solid #4a453d;
+            border-bottom: 1.5px solid #fff;
+            border-right: 1.5px solid #fff;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 100px;
+            cursor: pointer;
+        }
+
+        .power-rocker {
+            width: 12px;
+            height: 26px;
+            background-color: #dfd7ca;
+            border-radius: 2px;
+            position: relative;
+            transform-origin: center center;
+            transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 0;
+            
+            transform: rotateX(18deg);
+            box-shadow: 
+                inset 0 1.5px 2px rgba(0,0,0,0.3),
+                0 1.5px 2px rgba(0,0,0,0.2);
+            border-top: 1px solid #b3a99a;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        .power-rocker.off {
+            transform: rotateX(-18deg);
+            box-shadow: 
+                inset 0 -1.5px 2px rgba(0,0,0,0.3),
+                0 -1.5px 2px rgba(0,0,0,0.2);
+            border-top: 2px solid #ffffff;
+            border-bottom: 1px solid #b3a99a;
+            background-color: #c4bbb0;
+        }
+
+        .rocker-label {
+            font-family: var(--font-mono);
+            font-size: 6px;
+            font-weight: 950;
+            user-select: none;
+            line-height: 1;
+        }
+        
+        .power-rocker.off .rocker-label:first-child {
+            color: #9e978b;
+        }
+        
+        .power-rocker.off .rocker-label:last-child {
+            color: #2b2824;
+        }
+        
+        .power-rocker:not(.off) .rocker-label:first-child {
+            color: #2b2824;
+        }
+        
+        .power-rocker:not(.off) .rocker-label:last-child {
+            color: #9e978b;
+        }
+
+        .console-header {
+            padding: 10px 14px;
+            background-color: #0d0f15;
+            border-bottom: 3px solid var(--color-red);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .console-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .soviet-star {
+            width: 28px;
+            height: 28px;
+            fill: var(--color-red);
+            filter: drop-shadow(0 0 5px var(--color-red));
+            animation: pulse-glow 3s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% { filter: drop-shadow(0 0 2px var(--color-red)); }
+            100% { filter: drop-shadow(0 0 8px var(--color-red)); }
+        }
+
+        .console-title {
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .console-title .sub {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            margin-top: 3px;
+        }
+
+
+
+        .led.active-green {
+            background-color: var(--color-green);
+            box-shadow: 0 0 8px var(--color-green);
+            animation: led-blink 1.5s infinite step-end;
+        }
+
+
+        .led.active-red {
+            background-color: var(--color-red);
+            box-shadow: 0 0 8px var(--color-red);
+        }
+
+        .led.blink-red {
+            background-color: var(--color-red);
+            box-shadow: 0 0 8px var(--color-red);
+            animation: led-blink 0.4s infinite step-end;
+        }
+
+        @keyframes led-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+        .warning-banner {
+            padding: 10px 15px;
+            background-color: rgba(255, 170, 0, 0.05);
+            border-bottom: 1px solid rgba(255, 170, 0, 0.2);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .warning-icon {
+            color: var(--color-amber);
+            font-size: 1.5rem;
+            font-weight: bold;
+            line-height: 1;
+            padding: 2px 8px;
+            border: 2px solid var(--color-amber);
+            border-radius: 3px;
+            animation: warning-pulse 2s infinite alternate;
+        }
+
+        @keyframes warning-pulse {
+            0% { box-shadow: 0 0 2px rgba(255, 170, 0, 0.2); }
+            100% { box-shadow: 0 0 10px rgba(255, 170, 0, 0.5); }
+        }
+
+        .warning-text {
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: var(--text-primary);
+        }
+
+        .warning-text span.label {
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--color-amber);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .console-body {
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+            flex-grow: 1;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-muted) transparent;
+        }
+
+        .console-body::-webkit-scrollbar {
+            width: 4px;
+        }
+        .console-body::-webkit-scrollbar-thumb {
+            background-color: var(--border-muted);
+            border-radius: 2px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+        }
+
+        .terminal-comment {
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+
+        .hud-panel {
+            position: relative;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            background-color: rgba(7, 8, 11, 0.55);
+            background-image: radial-gradient(rgba(255, 51, 51, 0.08) 1px, transparent 1px);
+            background-size: 6px 6px;
+            border: 1px solid rgba(255, 51, 51, 0.1);
+            padding: 10px 14px;
+            margin-top: 6px;
+            border-radius: 3px;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
+        }
+
+        .hud-panel::before, .hud-panel::after {
+            content: "";
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border: 2px solid var(--color-red);
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+        
+        .hud-panel::before {
+            top: -2px; left: -2px;
+            border-right: none; border-bottom: none;
+        }
+        
+        .hud-panel::after {
+            bottom: -2px; right: -2px;
+            border-left: none; border-top: none;
+        }
+
+        .hud-panel:focus-within::before {
+            border-color: var(--color-red);
+            filter: drop-shadow(0 0 4px var(--color-red-glow));
+        }
+
+        .hud-panel:focus-within::after {
+            border-color: var(--color-red);
+            filter: drop-shadow(0 0 4px var(--color-red-glow));
+        }
+
+        .hud-prompt-user {
+            color: var(--color-green);
+            text-shadow: 0 0 5px rgba(0, 255, 102, 0.25);
+            font-weight: bold;
+            user-select: none;
+        }
+
+        .hud-prompt-symbol {
+            color: var(--text-primary);
+            user-select: none;
+            margin-right: 4px;
+        }
+
+        .hud-prefix {
+            color: var(--color-red);
+            font-weight: bold;
+            user-select: none;
+            letter-spacing: 0.5px;
+        }
+
+        .hud-input-field {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid rgba(255, 51, 51, 0.3);
+            outline: none;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: lowercase;
+            caret-color: var(--color-red);
+            padding: 2px 4px;
+            width: 220px;
+            transition: all 0.2s ease;
+            animation: cursor-pulse 1.5s infinite alternate;
+        }
+
+        @keyframes cursor-pulse {
+            0% { border-bottom-color: rgba(255, 51, 51, 0.25); }
+            100% { border-bottom-color: rgba(255, 51, 51, 1); }
+        }
+
+        .hud-input-field:focus {
+            border-bottom-color: var(--color-red);
+            text-shadow: 0 0 5px rgba(240, 242, 245, 0.8);
+            animation: none; /* stop pulse when focused to keep static glow */
+            box-shadow: 0 2px 8px var(--color-red-glow);
+        }
+
+        .hud-input-field::placeholder {
+            color: rgba(255, 255, 255, 0.12);
+            text-transform: none;
+            font-weight: 400;
+            letter-spacing: 0px;
+        }
+
+        .process-panel {
+            display: none; /* Controlled by JS */
+            flex-direction: column;
+            gap: 10px;
+            background-color: var(--bg-terminal);
+            border: 2px solid var(--border-muted);
+            padding: 12px 15px;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .result-panel {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding: 5px 0;
+        }
+
+        .error-panel {
+            display: none;
+            border: 2px solid var(--color-red);
+            background-color: rgba(255, 51, 51, 0.05);
+            padding: 15px 20px;
+            border-radius: 2px;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        .error-panel-title {
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--color-red);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .console-footer {
+            padding: 8px 12px;
+            background-color: #0c0d12;
+            border-top: 1px solid var(--border-muted);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .retro-pc-btn {
+            display: inline-block;
+            background-color: #bfb8ad; /* retro PC beige/gray */
+            color: #000000 !important;
+            font-family: 'Share Tech Mono', var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 8px 18px;
+            border-top: 3px solid #ffffff;
+            border-left: 3px solid #ffffff;
+            border-bottom: 3px solid #555555;
+            border-right: 3px solid #555555;
+            box-shadow: 2px 2px 0px #000000;
+            cursor: pointer;
+            user-select: none;
+            transition: none;
+        }
+
+        .retro-pc-btn:hover {
+            background-color: #c8c2b7;
+        }
+
+        .retro-pc-btn:active {
+            border-top: 3px solid #555555;
+            border-left: 3px solid #555555;
+            border-bottom: 3px solid #ffffff;
+            border-right: 3px solid #ffffff;
+            box-shadow: none;
+            transform: translate(2px, 2px);
+        }
+
+        .crt-curve {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            box-shadow: inset 0 0 80px rgba(0,0,0,0.85);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .boot-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #07080b;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+            overflow: hidden;
+        }
+
+        .boot-overlay::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%);
+            background-size: 100% 4px;
+            z-index: 10001;
+            pointer-events: none;
+        }
+
+        .boot-loader {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            z-index: 10002;
+            padding: 30px;
+            background: rgba(13, 15, 21, 0.8);
+            border: 2px solid var(--color-red);
+            box-shadow: 0 0 30px rgba(255, 51, 51, 0.15), inset 0 0 20px rgba(255, 51, 51, 0.05);
+            position: relative;
+        }
+
+        .boot-loader::before, .boot-loader::after {
+            content: "";
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 2px solid var(--color-red);
+            pointer-events: none;
+        }
+        .boot-loader::before {
+            top: -2px; left: -2px;
+            border-right: none; border-bottom: none;
+        }
+        .boot-loader::after {
+            bottom: -2px; right: -2px;
+            border-left: none; border-top: none;
+        }
+
+        .boot-title {
+            font-family: 'Share Tech Mono', var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--color-red);
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px var(--color-red-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .boot-title::after {
+            content: "";
+            width: 6px;
+            height: 12px;
+            background-color: var(--color-red);
+            animation: boot-cursor 0.8s infinite step-end;
+            box-shadow: 0 0 6px var(--color-red);
+        }
+
+        @keyframes boot-cursor {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .boot-bar {
+            width: 100%;
+            height: 16px;
+            background-color: rgba(255, 51, 51, 0.05);
+            border: 1px solid rgba(255, 51, 51, 0.4);
+            position: relative;
+            overflow: hidden;
+            padding: 2px;
+        }
+
+        .boot-fill {
+            width: 0%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--color-red),
+                var(--color-red) 6px,
+                transparent 6px,
+                transparent 10px
+            );
+            box-shadow: 0 0 8px var(--color-red-glow);
+            animation: boot-load-anim 1.5s cubic-bezier(0.1, 0.7, 0.1, 1) forwards;
+        }
+
+        .boot-status-logs {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+        }
+
+        .boot-log-line {
+            opacity: 0;
+            animation: log-fade-in 0.1s forwards;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .boot-log-line.green {
+            color: var(--color-green);
+        }
+        .boot-log-line.red {
+            color: var(--color-red);
+        }
+
+        @keyframes log-fade-in {
+            to { opacity: 1; }
+        }
+
+        @keyframes boot-load-anim {
+            0% { width: 0%; }
+            20% { width: 30%; }
+            50% { width: 55%; }
+            80% { width: 85%; }
+            100% { width: 100%; }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .console-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .console-body {
+                padding: 20px;
+            }
+            .console-title {
+                font-size: 0.95rem;
+            }
+            .result-val.key-style {
+                font-size: 1.15rem;
+            }
+            .computer-case {
+                height: auto;
+                padding: 15px 10px;
+            }
+            .case-front {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px 10px;
+            }
+            .floppy-drive {
+                width: 100%;
+            }
+            .case-vents {
+                display: none;
+            }
+        }
+
+        /* Scale down the monitor layout on short screens to prevent overflow */
+        @media (max-height: 620px) {
+            .monitor-housing {
+                margin: 5px auto;
+                padding: 10px 10px 5px 10px;
+            }
+            .computer-case {
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="crt-overlay"></div>
+    <div class="crt-curve"></div>
+    <div class="bg-grid"></div>
+
+    <div class="boot-overlay" id="bootOverlay">
+        <div class="boot-loader">
+            <div class="boot-title">initializing creepyScrap.com</div>
+            <div class="boot-bar">
+                <div class="boot-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="monitor-housing">
+        <div class="monitor-screen-bezel">
+            <div class="crt-glare"></div>
+  
+            <main class="console-container">
+                <div class="hazard-stripes"></div>
+
+        <header class="console-header">
+            <div class="console-title-wrap">
+                <svg class="soviet-star" viewBox="0 0 24 24">
+                    <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
+                </svg>
+                <h1 class="console-title">
+                    DEFAULT ACCESS KEY EXTRACTOR
+                </h1>
+            </div>
+        </header>
+
+        <div class="warning-banner">
+            <div class="warning-icon">!</div>
+            <div class="warning-text">
+                {% if detail %}
+                    {{ detail }}
+                {% else %}
+                    creepySrap.com only crack default fiberHome accessPoint;
+                {% endif %}
+            </div>
+        </div>
+
+        <section class="console-body">
+            <form class="form-group" id="decryptForm" autocomplete="off" onsubmit="event.preventDefault(); startDecryption();" style="gap: 5px;">
+                {% csrf_token %}
+                <div class="terminal-comment" style="color: var(--text-secondary); font-size: 0.75rem; letter-spacing: 0.5px;"># TARGET ACCESS POINT SSID // fh_ prefix required</div>
+                <div class="hud-panel" style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
+                    <div style="display: flex; gap: 6px; align-items: center; width: 100%; user-select: none; line-height: 1.2;">
+                        <span style="color: var(--color-green); text-shadow: 0 0 5px rgba(0, 255, 102, 0.25); font-weight: bold;">unhosted@cellesstine</span>
+                        <span style="color: var(--text-primary);">&gt; $</span>
+                        <span style="color: var(--text-primary);">python creepyScrap.py</span>
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: center; width: 100%; line-height: 1.2;">
+                        <span style="color: var(--color-red); font-weight: bold; text-shadow: 0 0 5px var(--color-red-glow);">accessPoint</span>
+                        <span style="color: var(--text-primary); margin-right: 2px;">&gt; fh_</span>
+                        <input 
+                            type="text" 
+                            id="accessPoint" 
+                            name="accessPoint"
+                            class="hud-input-field" 
+                            placeholder="a1b2c3d4"
+                            maxlength="22"
+                            required
+                            autofocus
+                        >
+                    </div>
+                </div>
+            </form>
+
+            <div class="error-panel" id="errorPanel">
+                <div class="error-panel-title">⚠️ DECRYPTION FAIL</div>
+                <div id="errorMessage">fiberHome &lt;unknownPattern&gt;</div>
+            </div>
+
+            <div class="process-panel" id="processPanel" style="border: none; padding: 0; background: transparent; margin: 10px 0 0 0; font-family: var(--font-mono); font-size: 0.95rem; color: var(--color-amber); white-space: pre; letter-spacing: 1px; text-align: center;">
+                <span id="textProgressBar">[....................................]</span>
+            </div>
+
+            <div class="result-panel" id="resultPanel">
+                <div class="ascii-card" style="display: flex; flex-direction: column; width: 100%; background-color: var(--bg-terminal); padding: 5px 0; border-radius: 4px;">
+                    <div class="ascii-header" style="display: flex; justify-content: space-between; font-family: var(--font-mono); color: var(--text-secondary); font-size: 0.85rem; font-weight: bold; padding: 0 10px; overflow: hidden; white-space: nowrap;">
+                        <span>╔═══ KEY EXTRACTED </span>
+                        <span style="flex-grow: 1; overflow: hidden; color: var(--text-secondary);">═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════</span>
+                        <span>╗</span>
+                    </div>
+                    <div class="ascii-row" style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.85rem; padding: 0 10px; color: var(--text-primary); line-height: 1.8;">
+                        <span><span style="color: var(--text-secondary);">║</span> TARGET AP   : <span id="resultSsid" style="color: var(--text-primary); font-weight: bold;">fh_fedcba98</span></span>
+                        <span style="color: var(--text-secondary);">║</span>
+                    </div>
+                    <div class="ascii-row" style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.85rem; padding: 0 10px; color: var(--text-primary); line-height: 1.8;">
+                        <span><span style="color: var(--text-secondary);">║</span> CRYPTO TYPE : FiberHome WPA2 Default</span>
+                        <span style="color: var(--text-secondary);">║</span>
+                    </div>
+                    <div class="ascii-row" style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.85rem; padding: 0 10px; color: var(--text-primary); line-height: 1.8;">
+                        <span style="color: var(--text-secondary);">║</span>
+                        <span style="color: var(--text-secondary);">║</span>
+                    </div>
+                    <div class="ascii-row" style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.85rem; padding: 0 10px; color: var(--text-primary); line-height: 1.8;">
+                        <span><span style="color: var(--text-secondary);">║</span> PASSKEY     : <span id="resultKey" style="color: var(--color-red); font-weight: 800; text-shadow: 0 0 8px var(--color-red-glow);">wlan01234567</span></span>
+                        <span style="color: var(--text-secondary);">║</span>
+                    </div>
+                    <div class="ascii-footer" style="display: flex; justify-content: space-between; font-family: var(--font-mono); color: var(--text-secondary); font-size: 0.85rem; font-weight: bold; padding: 0 10px; overflow: hidden; white-space: nowrap;">
+                        <span>╚</span>
+                        <span style="flex-grow: 1; overflow: hidden; color: var(--text-secondary);">═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════</span>
+                        <span>╝</span>
+                    </div>
+                </div>
+                <button class="retro-pc-btn" onclick="copyPasskey()" id="copyBtn" style="margin-top: 15px; display: block; width: 100%; text-align: center; box-sizing: border-box;">
+                    COPY DECRYPTED KEY
+                </button>
+            </div>
+        </section>
+
+        <footer class="console-footer">
+            <a href="#" class="retro-pc-btn" onclick="resetForm(); return false;" style="padding: 4px 12px; font-size: 0.65rem;">RESET SYSTEM</a>
+        </footer>
+    </main>
+        </div>
+        <div class="monitor-controls" style="justify-content: flex-end;">
+            <div class="monitor-power">
+                <div class="power-led"></div>
+            </div>
+        </div>
+    </div>
+    <div class="monitor-stand"></div>
+    <div class="computer-case">
+        <div class="case-front">
+            <div class="case-vents">
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            
+            <div class="floppy-drive">
+                <div class="floppy-slot"></div>
+                <div class="floppy-button"></div>
+                <div class="floppy-led"></div>
+            </div>
+
+            <div class="toggle-switch-wrap">
+                <div class="toggle-switch-label">POWER</div>
+                <div class="power-rocker-container" onclick="toggleMonitorPower()">
+                    <div class="power-rocker">
+                        <span class="rocker-label">I</span>
+                        <span class="rocker-label">O</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const bootOverlay = document.getElementById('bootOverlay');
+        const decryptForm = document.getElementById('decryptForm');
+        const accessPointInput = document.getElementById('accessPoint');
+
+        const errorPanel = document.getElementById('errorPanel');
+        const errorMessage = document.getElementById('errorMessage');
+        const processPanel = document.getElementById('processPanel');
+        const textProgressBar = document.getElementById('textProgressBar');
+        const resultPanel = document.getElementById('resultPanel');
+        const resultSsid = document.getElementById('resultSsid');
+        const resultKey = document.getElementById('resultKey');
+        const copyBtn = document.getElementById('copyBtn');
+        const ledCrack = document.getElementById('ledCrack') || { className: '' };
+        const ledApi = document.getElementById('ledApi') || { className: '' };
+        const ledSys = document.getElementById('ledSys') || { className: '' };
+        
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                bootOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    bootOverlay.style.display = 'none';
+                }, 500);
+            }, 1600);
+        });
+
+        // Safely convert to lowercase on input without messing up the cursor
+        accessPointInput.addEventListener('input', (e) => {
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+            e.target.value = e.target.value.toLowerCase();
+            e.target.setSelectionRange(start, end);
+        });
+
+        // Strip fh_ prefix on blur to avoid visual duplicate with the static prefix on screen
+        accessPointInput.addEventListener('blur', (e) => {
+            let val = e.target.value.trim().toLowerCase();
+            if (val.startsWith('fh_')) {
+                val = val.substring(3);
+            }
+            e.target.value = val;
+        });
+
+        function scrollScreenToBottom() {
+            const consoleBody = document.querySelector('.console-body');
+            if (consoleBody) {
+                setTimeout(() => {
+                    consoleBody.scrollTop = consoleBody.scrollHeight;
+                }, 50);
+            }
+        }
+
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+        async function startDecryption() {
+            errorPanel.style.display = 'none';
+            resultPanel.style.display = 'none';
+            
+            let suffix = accessPointInput.value.trim().toLowerCase();
+            if (suffix.startsWith('fh_')) {
+                suffix = suffix.substring(3);
+            }
+            if (!suffix) return;
+            const fullSsid = 'fh_' + suffix;
+            accessPointInput.value = suffix;
+
+            const floppyLed = document.querySelector('.floppy-led');
+            let floppyInterval = null;
+            if (floppyLed) {
+                floppyInterval = setInterval(() => {
+                    floppyLed.classList.toggle('active');
+                }, 100);
+            }
+
+            accessPointInput.disabled = true;
+            ledCrack.className = 'led blink-red';
+            ledApi.className = 'led';
+
+            processPanel.style.display = 'flex';
+            textProgressBar.innerText = '[' + '.'.repeat(36) + ']';
+            scrollScreenToBottom();
+
+            let passKeyResult = null;
+            let validationError = null;
+
+            try {
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+                
+                const response = await fetch('/creepyScrap/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken || ''
+                    },
+                    body: JSON.stringify({ accessPoint: fullSsid })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data['fiberHome <default passKey>']) {
+                    passKeyResult = data['fiberHome <default passKey>'];
+                } else if (data['accessPoint']) {
+                    validationError = data['accessPoint'].join(', ');
+                } else {
+                    validationError = JSON.stringify(data);
+                }
+            } catch (err) {
+                validationError = err.message;
+            }
+
+            ledApi.className = 'led active-amber';
+
+            const asciiChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+{}|:<>?-=[]\\;,./';
+            const noiseLength = 36;
+            const animationSteps = 15;
+            for (let i = 0; i < animationSteps; i++) {
+                let noise = '';
+                for (let j = 0; j < noiseLength; j++) {
+                    noise += asciiChars[Math.floor(Math.random() * asciiChars.length)];
+                }
+                textProgressBar.innerText = `[${noise}]`;
+                await sleep(15);
+            }
+
+            processPanel.style.display = 'none';
+
+            if (passKeyResult) {
+                resultSsid.innerText = fullSsid;
+                resultKey.innerText = passKeyResult;
+                
+                resultPanel.style.display = 'flex';
+                ledCrack.className = 'led active-green';
+                scrollScreenToBottom();
+            } else {
+                errorMessage.innerHTML = `Backend error: <strong>${validationError}</strong>`;
+                errorPanel.style.display = 'block';
+                ledCrack.className = 'led active-red';
+                scrollScreenToBottom();
+            }
+
+            if (floppyInterval) {
+                clearInterval(floppyInterval);
+            }
+            if (floppyLed) {
+                floppyLed.classList.remove('active');
+            }
+
+            accessPointInput.disabled = false;
+            accessPointInput.focus();
+        }
+
+        function copyPasskey() {
+            const keyText = resultKey.innerText;
+            navigator.clipboard.writeText(keyText).then(() => {
+                copyBtn.style.borderTop = '3px solid #555555';
+                copyBtn.style.borderLeft = '3px solid #555555';
+                copyBtn.style.borderBottom = '3px solid #ffffff';
+                copyBtn.style.borderRight = '3px solid #ffffff';
+                copyBtn.style.boxShadow = 'none';
+                copyBtn.style.transform = 'translate(2px, 2px)';
+                
+                setTimeout(() => {
+                    copyBtn.style.borderTop = '3px solid #ffffff';
+                    copyBtn.style.borderLeft = '3px solid #ffffff';
+                    copyBtn.style.borderBottom = '3px solid #555555';
+                    copyBtn.style.borderRight = '3px solid #555555';
+                    copyBtn.style.boxShadow = '2px 2px 0px #000000';
+                    copyBtn.style.transform = 'none';
+                }, 200);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        function resetForm() {
+            decryptForm.reset();
+            errorPanel.style.display = 'none';
+            processPanel.style.display = 'none';
+            resultPanel.style.display = 'none';
+            accessPointInput.disabled = false;
+            
+            ledCrack.className = 'led';
+            ledApi.className = 'led active-amber';
+            ledSys.className = 'led active-green';
+            
+            accessPointInput.focus();
+        }
+
+        function toggleMonitorPower() {
+            const container = document.querySelector('.console-container');
+            const led = document.querySelector('.power-led');
+            const rocker = document.querySelector('.power-rocker');
+            if (container.classList.contains('screen-off')) {
+                container.classList.remove('screen-off');
+                if (led) led.classList.remove('off');
+                if (rocker) rocker.classList.remove('off');
+            } else {
+                container.classList.add('screen-off');
+                if (led) led.classList.add('off');
+                if (rocker) rocker.classList.add('off');
+            }
+        }
+    </script>
+</body>
+</html>
