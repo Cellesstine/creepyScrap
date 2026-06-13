@@ -581,6 +581,15 @@
             margin-bottom: 4px;
         }
 
+        .hud-line {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            width: 100%;
+            line-height: 1.2;
+            flex-wrap: wrap;
+        }
+
         .hud-panel {
             position: relative;
             display: flex;
@@ -915,48 +924,218 @@
             100% { width: 100%; }
         }
 
-        @media (max-width: 600px) {
+        /* Responsive design for tablets and mobile devices */
+        @media (max-width: 768px) {
+            html, body {
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
             body {
+                justify-content: flex-start;
                 padding: 10px;
             }
-            .console-header {
-                flex-direction: column;
-                align-items: flex-start;
+
+            .monitor-housing {
+                margin: 10px auto;
+                padding: 12px 12px 8px 12px;
+                border-radius: 12px;
+                box-shadow: 
+                    0 15px 30px -10px rgba(0, 0, 0, 0.6),
+                    inset 2px 2px 0px #ffffff,
+                    inset -2px -2px 0px #857e72,
+                    0px 6px 0px #857e72;
             }
+
+            .monitor-screen-bezel {
+                padding: 8px;
+                border-radius: 4px;
+            }
+
+            .console-container {
+                height: 60vh;
+                min-height: 320px;
+                max-height: none;
+            }
+
             .console-body {
-                padding: 20px;
+                padding: 10px 12px;
+                gap: 10px;
             }
-            .console-title {
-                font-size: 0.95rem;
+
+            .hud-panel {
+                padding: 8px 12px;
             }
-            .result-val.key-style {
-                font-size: 1.15rem;
-            }
-            .computer-case {
-                height: auto;
-                padding: 15px 10px;
-            }
-            .case-front {
-                flex-direction: column;
-                gap: 15px;
-                padding: 15px 10px;
-            }
-            .floppy-drive {
+
+            .hud-input-field {
                 width: 100%;
+                flex-grow: 1;
+                box-sizing: border-box;
             }
+
+            .retro-pc-btn {
+                padding: 10px 20px;
+                font-size: 0.8rem;
+            }
+
+            .console-footer .retro-pc-btn {
+                padding: 8px 16px;
+                font-size: 0.75rem;
+            }
+
+            .monitor-stand {
+                width: 80px;
+                height: 6px;
+            }
+
+            .computer-case {
+                width: 100%;
+                height: auto;
+                padding: 10px;
+                box-shadow: 
+                    inset 2px 2px 0px #ffffff,
+                    inset -2px -2px 0px #857e72,
+                    0px 6px 12px rgba(0,0,0,0.5);
+            }
+
+            .case-front {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0 5px;
+                gap: 10px;
+            }
+
             .case-vents {
                 display: none;
             }
+
+            .floppy-drive {
+                width: 130px;
+                flex-shrink: 0;
+            }
+
+            .toggle-switch-wrap {
+                flex-shrink: 0;
+            }
         }
 
-        /* Scale down the monitor layout on short screens to prevent overflow */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .monitor-housing {
+                padding: 8px 8px 6px 8px;
+                border-radius: 8px;
+                box-shadow: 
+                    0 10px 20px -5px rgba(0, 0, 0, 0.5),
+                    inset 1.5px 1.5px 0px #ffffff,
+                    inset -1.5px -1.5px 0px #857e72,
+                    0px 3px 0px #857e72;
+            }
+
+            .monitor-screen-bezel {
+                padding: 6px;
+                border-radius: 3px;
+            }
+
+            .console-container {
+                height: 65vh;
+                min-height: 290px;
+            }
+
+            .console-title {
+                font-size: 0.75rem;
+            }
+
+            .soviet-star {
+                width: 20px;
+                height: 20px;
+            }
+
+            .console-title-wrap {
+                gap: 8px;
+            }
+
+            .console-body {
+                padding: 8px 10px;
+                gap: 8px;
+            }
+
+            .warning-banner {
+                padding: 8px 10px;
+                gap: 8px;
+            }
+
+            .warning-icon {
+                font-size: 1.1rem;
+                padding: 1px 5px;
+            }
+
+            .warning-text {
+                font-size: 0.75rem;
+            }
+
+            .hud-panel {
+                font-size: 0.8rem;
+                padding: 8px 10px;
+            }
+
+            .hud-input-field {
+                font-size: 0.8rem;
+            }
+
+            #processPanel {
+                font-size: clamp(0.5rem, 3.5vw, 0.95rem) !important;
+            }
+
+            .ascii-card {
+                font-size: clamp(0.55rem, 3.2vw, 0.85rem) !important;
+            }
+
+            .ascii-card .ascii-header,
+            .ascii-card .ascii-row,
+            .ascii-card .ascii-footer {
+                font-size: inherit !important;
+                padding: 0 5px !important;
+            }
+
+            .retro-pc-btn {
+                padding: 8px 16px;
+                font-size: 0.75rem;
+            }
+
+            .console-footer .retro-pc-btn {
+                padding: 6px 12px;
+                font-size: 0.65rem;
+            }
+
+            .boot-loader {
+                width: 90%;
+                padding: 20px;
+                gap: 12px;
+            }
+
+            .boot-title {
+                font-size: 0.65rem;
+            }
+
+            .boot-status-logs {
+                font-size: 0.55rem;
+            }
+        }
+
+        /* Adjustments for landscape / short viewports */
         @media (max-height: 620px) {
             .monitor-housing {
                 margin: 5px auto;
                 padding: 10px 10px 5px 10px;
             }
-            .computer-case {
-                height: 50px;
+            .console-container {
+                min-height: 220px;
             }
         }
     </style>
@@ -968,7 +1147,7 @@
 
     <div class="boot-overlay" id="bootOverlay">
         <div class="boot-loader">
-            <div class="boot-title">initializing creepyScrap.com</div>
+            <div class="boot-title">initializing creepyScrap</div>
             <div class="boot-bar">
                 <div class="boot-fill"></div>
             </div>
@@ -1009,14 +1188,14 @@
                 {% csrf_token %}
                 <div class="terminal-comment" style="color: var(--text-secondary); font-size: 0.75rem; letter-spacing: 0.5px;"># TARGET ACCESS POINT SSID // fh_ prefix required</div>
                 <div class="hud-panel" style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
-                    <div style="display: flex; gap: 6px; align-items: center; width: 100%; user-select: none; line-height: 1.2;">
-                        <span style="color: var(--color-green); text-shadow: 0 0 5px rgba(0, 255, 102, 0.25); font-weight: bold;">unhosted@cellesstine</span>
-                        <span style="color: var(--text-primary);">&gt; $</span>
+                    <div class="hud-line" style="user-select: none;">
+                        <span class="hud-prompt-user">unhosted@cellesstine</span>
+                        <span class="hud-prompt-symbol">&gt; $</span>
                         <span style="color: var(--text-primary);">python creepyScrap.py</span>
                     </div>
-                    <div style="display: flex; gap: 6px; align-items: center; width: 100%; line-height: 1.2;">
-                        <span style="color: var(--color-red); font-weight: bold; text-shadow: 0 0 5px var(--color-red-glow);">accessPoint</span>
-                        <span style="color: var(--text-primary); margin-right: 2px;">&gt; fh_</span>
+                    <div class="hud-line">
+                        <span class="hud-prefix" style="text-shadow: 0 0 5px var(--color-red-glow);">accessPoint</span>
+                        <span class="hud-prompt-symbol">&gt; fh_</span>
                         <input 
                             type="text" 
                             id="accessPoint" 
